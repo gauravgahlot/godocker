@@ -1,0 +1,14 @@
+version: "2"
+services:
+  go-server:
+    image: quickdevnotes/goserver
+    container_name: go-server
+    ports:
+      - 5001:8001
+  go-client:
+    build: ./goclient
+    container_name: go-client
+    ports:
+      - 5000:8000
+    depends_on:
+      - go-server 
