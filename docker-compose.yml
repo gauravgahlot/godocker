@@ -6,7 +6,7 @@ services:
     ports:
       - 5001:8001
   go-client:
-    build: ./goclient
+    image: quickdevnotes/goclient
     container_name: go-client
     ports:
       - 5000:8000
