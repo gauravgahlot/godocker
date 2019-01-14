@@ -1,0 +1,81 @@
+# Configure the DNS in resolv.conf 
+1. To add new entries
+   	nano /etc/resolvconf/resolv.conf.d/base 
+   	sudo resolvconf -u
+2. edit your /etc/network/interfaces and add your entries there, like
+   	auto eth0 
+   	iface eth0 inet dhcp 
+   	dns-search google.com 
+	dns-nameservers dnsserverip
+3. restart networking service
+	/etc/init.d/networking restart
+
+
+# Fix the failing CoreDNS pods
+1. Edit coredns configmap
+   	kubectl -n kube-system edit configmap coredns  
+2. remove or comment the line `loop`, save and exit
+3. remove the CoreDNS pods
+   	kubectl -n kube-system delete pod -l k8s-app=kube-dns
+
+
+# Recreate join token for K8s nodes
+	kubeadm token create --print-join-command
+
+
+# Initialize a cluster with Calico
+1. Initialize the master using the following command.
+	sudo kubeadm init --pod-network-cidr=10.244.0.0/16
+2. Execute the following commands to configure kubectl (also returned by kubeadm init) and save the join command for later use
+	mkdir -p $HOME/.kube
+  	sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  	sudo chown $(id -u):$(id -g) $HOME/.kube/config
+	
+3. Install an etcd instance with the following command
+	kubectl apply -f \
+https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/etcd.yaml
+4. Install Calico with the following command
+	kubectl apply -f \
+https://docs.projectcalico.org/v3.4/getting-started/kubernetes/installation/hosted/calico.yaml
+5. Confirm that all of the pods are running with the following command (wait until each pod has the STATUS of Running)
+	watch kubectl get pods --all-namespaces
+6. (OPTIONAL) Remove the taints on the master so that you can schedule pods on it
+	kubectl taint nodes --all node-role.kubernetes.io/master-
+7. On the nodes, execute the join (returned by kubeadm init) command to join the cluster
+	kubeadm join 172.27.127.159:6443 --token 1vnutm.pq1d17t5tj33qcgz --discovery-token-ca-cert-hash 	sha256:20fdba51d34495d5fa100f0304c4b131b5ae5fbb6a7b169a1d4c7a831d71009e
+8. Confirm that you now have a node in your cluster with the following command
+	kubectl get nodes -o wide
+
+
+# Setup K8s Dashboard
+1. Deploy dashborad 
+	kubectl create -f https://raw.githubusercontent.com/kubernetes/dashboard/master/aio/deploy/recommended/kubernetes-dashboard.yaml
+2. To create service account for admin user, copy below code to some dashboard-adminuser.yaml file and use `kubectl apply -f dashboard-adminuser.yaml` to create them.
+	apiVersion: v1
+	kind: ServiceAccount
+	metadata:
+	  name: admin-user
+	  namespace: kube-system
+3. Create ClusterRoleBinding: save the following into user-role.yaml
+	apiVersion: rbac.authorization.k8s.io/v1
+	kind: ClusterRoleBinding
+	metadata:
+	  name: admin-user
+	roleRef:
+	  apiGroup: rbac.authorization.k8s.io
+	  kind: ClusterRole
+	  name: cluster-admin
+	subjects:
+	- kind: ServiceAccount
+	  name: admin-user
+	  namespace: kube-system
+
+   Now run the command: kubectl create -f user-role.yaml
+4. Now we need to find token we can use to log in. Execute following command:
+	kubectl -n kube-system describe secret $(kubectl -n kube-system get secret | grep admin-user | awk '{print $1}')
+5. Copy the token value from above command.
+6. Accessing the Dashboard UI
+	kubectl proxy
+7. Enter the following URL in a browser
+	http://localhost:8001/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/
+
