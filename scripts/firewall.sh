@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt install -y -y firewalld
+apt install -y --allow-unauthenticated firewalld
 
 firewall-cmd --zone=public --add-port=16443/tcp --permanent
 firewall-cmd --zone=public --add-port=6443/tcp --permanent
