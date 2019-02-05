@@ -2,11 +2,17 @@
 
 # run this script only after the 'etcd-config-files.sh'
 
+# if you do not already have a CA then run this command on $HOST0 
+# (where you generated the configuration files for kubeadm).
+kubeadm init phase certs etcd-ca
+
+
 kubeadm init phase certs etcd-server --config=/tmp/${HOST2}/kubeadmcfg.yaml
 kubeadm init phase certs etcd-peer --config=/tmp/${HOST2}/kubeadmcfg.yaml
 kubeadm init phase certs etcd-healthcheck-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
 kubeadm init phase certs apiserver-etcd-client --config=/tmp/${HOST2}/kubeadmcfg.yaml
 cp -R /etc/kubernetes/pki /tmp/${HOST2}/
+
 # cleanup non-reusable certificates
 find /etc/kubernetes/pki -not -name ca.crt -not -name ca.key -type f -delete
 
