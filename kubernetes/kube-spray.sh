@@ -1,7 +1,13 @@
 #!/bin/bash
 
+
+# remove lock from dpkg and apt/lists
+rm /var/lib/dpkg/lock
+rm /var/lib/apt/lists/lock
+apt-get update
+
+
 # install ansible
-sudo apt-get update
 sudo apt-get install -y software-properties-common
 sudo apt-add-repository -y ppa:ansible/ansible
 sudo apt-get update
