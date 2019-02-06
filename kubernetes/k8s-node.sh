@@ -23,4 +23,5 @@ sudo apt-get update
 
 
 # install K8s components
-sudo apt-get install -y docker.io kubeadm kubelet
+apt-get install -y docker.io kubeadm kubelet
+apt-mark hold kubelet kubeadm 
