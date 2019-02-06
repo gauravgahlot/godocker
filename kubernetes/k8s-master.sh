@@ -19,8 +19,9 @@ EOF
 
 
 # pull in the updates for repositories
-sudo apt-get update
+apt-get update
 
 
 # install K8s components
-sudo apt-get install -y docker.io kubeadm kubectl kubelet kubernetes-cni
+apt-get install -y docker.io kubeadm kubectl kubelet kubernetes-cni
+apt-mark hold kubelet kubeadm kubectl
