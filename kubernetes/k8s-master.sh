@@ -1,12 +1,6 @@
 #!/bin/bash
 
 
-# remove lock from dpkg and apt/lists
-rm /var/lib/dpkg/lock
-rm /var/lib/apt/lists/lock
-apt-get update
-
-
 # install dependencies
 apt install -y apt-transport-https curl
 
