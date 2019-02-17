@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# disable swap
+swapoff -a
+sed -i.bak -r 's/(.+ swap .+)/#\1/' /etc/fstab
+
 
 # install dependencies
 apt install -y apt-transport-https curl
