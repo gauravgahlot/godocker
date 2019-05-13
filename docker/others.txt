@@ -1,0 +1,50 @@
+
+# Declare HOSTS for etcd cluster
+export HOST0=172.27.127.166
+export HOST1=172.27.127.1
+export HOST2=172.27.127.102
+
+# GitHub scripts
+wget -O - https://raw.githubusercontent.com/gauravgahlot/godocker/master/kubernetes/k8s-etcd.sh | bash
+wget -O - https://raw.githubusercontent.com/gauravgahlot/godocker/master/kubernetes/generate-certificates.sh | bash
+wget -O - https://raw.githubusercontent.com/gauravgahlot/godocker/master/kubernetes/k8s-node.sh | bash
+wget -O - https://raw.githubusercontent.com/gauravgahlot/godocker/master/kubernetes/k8s-master.sh | bash
+
+
+# Check etcd cluster health
+docker run --rm -it \
+--net host \
+-v /etc/kubernetes:/etc/kubernetes quay.io/coreos/etcd:v3.3.10 etcdctl \
+--cert-file /etc/kubernetes/pki/etcd/peer.crt \
+--key-file /etc/kubernetes/pki/etcd/peer.key \
+--ca-file /etc/kubernetes/pki/etcd/ca.crt \
+--endpoints https://172.27.127.166:2379 cluster-health
+
+
+# Adding nodeSelector for Ingress controller pods
+kubectl label nodes name_of_your_node dedicated=master
+spec:
+  nodeSelector:
+    dedicated: master
+
+
+# Secrets and Resources
+volumeMounts:
+        - name: secrets
+          mountPath: /app/secrets
+          readOnly: true
+      volumes:
+      - name: secrets
+        secret:
+          secretName: appsettings-testing
+
+  resources:
+          limits:
+            cpu: 500m
+            memory: 0.5Gi
+          requests:
+            cpu: 100m
+            memory: 0.5Gi
+
+
+
