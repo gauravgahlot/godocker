@@ -14,13 +14,25 @@ Copy the following files to `/etc/docker/`
  - server-key.pem
 
 ## Test your changes
-The following command can be used to test if the changes are working. However, it is NOT recommened for securing the daemon:
+The following command can be used to test if the changes are working. However, it is NOT recommened as a way to run the daemon :
 ```
 nohup <command> &
 ```
 where `command` should be: 
 ```
 dockerd --tlsverify --tlscacert=ca.pem --tlscert=server-cert.pem --tlskey=server-key.pem -H=0.0.0.0:2376
+```
+
+# Fixes for issues you might run into
+
+When you try to run the above command you might get an error about `docker.pid`. To fix it remove the `docker.pid` using the command:
+```
+rm /var/run/docker.pid
+```
+
+Kill the process listening at port `2376` using the command:
+```
+sudo kill `sudo lsof -t -i:2376`
 ```
 
 ## Update the Docker service 
