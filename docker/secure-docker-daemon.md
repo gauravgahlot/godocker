@@ -1,9 +1,9 @@
 # Protect the Docker daemon socket
 
 Follow the steps in Docker [docs](https://docs.docker.com/engine/security/https/) to:
-    - generate certs for server and client
-    - test if the `daemon` is secure
-    - test if the client can use the certs
+  - generate certs for server and client
+  - test if the `daemon` is secure
+  - test if the client can use the certs
 
 
 ## Copy the certs to docker directory
